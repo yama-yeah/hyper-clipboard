@@ -15,4 +15,5 @@ pyobjc-framework-corebluetooth==9.2
 pyobjc-framework-libdispatch==9.2
 pyperclip==1.8.2
 simplepyble==0.7.1
+sqids==0.4.1
 typing-extensions==4.10.0

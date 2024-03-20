@@ -10,6 +10,7 @@ dependencies = [
     "simplepyble>=0.7.1",
     "bleak>=0.21.1",
     "bless>=0.2.6",
+    "sqids>=0.4.1",
 ]
 readme = "README.md"
 requires-python = ">= 3.11"
