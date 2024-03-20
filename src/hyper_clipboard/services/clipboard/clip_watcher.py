@@ -1,6 +1,6 @@
 import threading
 import time
-from ..const.observable_objects import ObservableStreamer,Observable
+from ...const.observable_objects import ObservableStreamer,Observable
 import pyperclip
 class ClipObservable(Observable[str]):
     def __init__(self,name:str):

@@ -6,6 +6,7 @@ import threading
 from pprint import pprint
 
 
+# kotlinのsealed classみたいなことをしたい
 class _StreamData(ABC):
     def __init__(self,value):
         self.value=value
@@ -18,7 +19,7 @@ class DidNotChangeStreamData(_StreamData):
     def __init__(self,value):
         super().__init__(value)
 
-
+#RXSwiftみたいに変更を監視したい
 T = TypeVar('T')
 class Observable(ABC,Generic[T]):
     def __init__(self,name:str):
@@ -43,6 +44,8 @@ class StreamLog:
     from_:str
     data:object
 
+#今回の実装だとここに全部のObservableを入れて監視する設計になっている
+#自由度は低いけど、今回の規模ならちょうどいいかも
 class ObservableStreamer:
     def __init__(self,observables:list[Observable],interval:float):
         super().__init__()
@@ -57,8 +60,7 @@ class ObservableStreamer:
                     yield StreamLog(from_=observable.name,data=data.value)
             time.sleep(self.interval)
 
-
-
+#debug用のクラス
 class ObservableLogger(threading.Thread):
     @staticmethod
     def print_log(log:StreamLog):
@@ -87,7 +89,8 @@ class ObservableLogger(threading.Thread):
     def stop(self):
         self.running=False
         self.join()
-    
+
+#後々のためにObservableStackerを作っておく    
 class ObservableStacker(threading.Thread):
     def __init__(self,observables:list[Observable],interval:float,max_stack_size:int|None=None):
         super().__init__()
