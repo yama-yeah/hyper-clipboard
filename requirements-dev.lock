@@ -8,6 +8,7 @@
 
 -e file:.
 bleak==0.21.1
+bless==0.2.6
 pyobjc-core==9.2
 pyobjc-framework-cocoa==9.2
 pyobjc-framework-corebluetooth==9.2
