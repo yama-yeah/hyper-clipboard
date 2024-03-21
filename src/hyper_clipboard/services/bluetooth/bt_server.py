@@ -73,6 +73,7 @@ class BTServer(BTObject):
         },
     }
     def __init__(self,server_name:str="HC-"+hostname):
+        super().__init__()
         self.trigger: Union[asyncio.Event, threading.Event]
         server_name=server_name[:12]
         if sys.platform in ["darwin", "win32"]:
