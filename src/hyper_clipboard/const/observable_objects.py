@@ -22,9 +22,9 @@ class DidNotChangeStreamData(_StreamData):
 #RXSwiftみたいに変更を監視したい
 T = TypeVar('T')
 class Observable(ABC,Generic[T]):
-    def __init__(self,name:str):
+    def __init__(self,observer_name:str):
         self.old = self.get_target()
-        self.name = name
+        self.observer_name = observer_name
     @abstractmethod
     def get_target(self)->T:
         pass
@@ -57,7 +57,7 @@ class ObservableStreamer:
             for observable in self.observables:
                 data=observable.get_stream_data()
                 if isinstance(data,ChangedStreamData):
-                    yield StreamLog(from_=observable.name,data=data.value)
+                    yield StreamLog(from_=observable.observer_name,data=data.value)
             time.sleep(self.interval)
 
 #debug用のクラス
@@ -81,7 +81,7 @@ class ObservableLogger(threading.Thread):
             for observable in self.observables:
                 data=observable.get_stream_data()
                 if isinstance(data,ChangedStreamData):
-                    log=StreamLog(from_=observable.name,data=data)
+                    log=StreamLog(from_=observable.observer_name,data=data)
                     if self.hook:
                         self.hook(log)
             time.sleep(self.interval)
@@ -104,7 +104,7 @@ class ObservableStacker(threading.Thread):
             for observable in self.observables:
                 data=observable.get_stream_data()
                 if isinstance(data,ChangedStreamData):
-                    log=StreamLog(from_=observable.name,data=data)
+                    log=StreamLog(from_=observable.observer_name,data=data)
                     if self.max_stack_size and len(self.stack) >= self.max_stack_size:
                         self.stack.pop(0)
                     self.stack.append(log)
