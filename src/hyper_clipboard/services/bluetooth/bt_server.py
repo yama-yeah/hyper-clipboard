@@ -20,6 +20,7 @@ from bless import (  # type: ignore
 
 
 class BTServer(BTObject):
+    
     gatt: dict = {
         UUIDNames.MAIN: {
             UUIDNames.TIMESTAMP: {
@@ -82,10 +83,17 @@ class BTServer(BTObject):
             self.trigger = asyncio.Event()
         self.loop = asyncio.get_event_loop()
         self.server:BlessServer=BlessServer(server_name,self.loop)
+    
+    def read_request(characteristic: BlessGATTCharacteristic, **kwargs) -> bytearray: # type: ignore
+        return characteristic.value
+    def write_request(characteristic: BlessGATTCharacteristic, value: Any, **kwargs): # type: ignore
+        characteristic.value = value
 
     async def _main(self):
         self.trigger.clear()
         await self.server.add_gatt(self.gatt)
+        self.server.read_request_func = self.read_request #type: ignore
+        self.server.write_request_func = self.write_request #type: ignore
         print("Starting server")
         await self.server.start()
         print("Server started")
