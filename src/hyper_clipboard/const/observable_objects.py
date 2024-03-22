@@ -42,6 +42,16 @@ class Observable(ABC,Generic[T]):
         else:
             return DidNotChangeStreamData(new)
 
+# 帰る値がないObservable
+class VoidObservable(Observable):
+    def __init__(self,observer_name:str):
+        super().__init__(observer_name)
+    @abstractmethod
+    def get_target(self):
+        pass
+    def compare_target(self,new,old):
+        return False
+
 @dataclass
 class StreamLog:
     from_:str
