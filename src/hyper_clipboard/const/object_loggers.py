@@ -47,6 +47,14 @@ class VoidObjectLog(ObjectLog[T]):
         return True
         
 class LogsManager(Generic[T]):
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls, *args, **kwargs)
+
+        return cls._instance
+    
     def __init__(self,init_logs:list[ObjectLog[T]]=[],max_logs_length:int=1) -> None:
         self._logs = init_logs
         self.max_logs_length = max_logs_length
