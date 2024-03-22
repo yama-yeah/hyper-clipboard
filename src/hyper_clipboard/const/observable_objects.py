@@ -7,6 +7,7 @@ from pprint import pprint
 
 
 # kotlinのsealed classみたいなことをしたい
+@dataclass
 class _StreamData(ABC):
     def __init__(self,value):
         self.value=value
@@ -30,6 +31,8 @@ class Observable(ABC,Generic[T]):
         pass
     @abstractmethod
     def compare_target(self,new,old)->bool:
+        pass
+    def close_func(self):
         pass
     def get_stream_data(self)->_StreamData:
         new = self.get_target()
@@ -59,6 +62,8 @@ class ObservableStreamer:
                 if isinstance(data,ChangedStreamData):
                     yield StreamLog(from_=observable.observer_name,data=data.value)
             time.sleep(self.interval)
+        for observable in self.observables:
+            observable.close_func()
 
 #debug用のクラス
 class ObservableLogger(threading.Thread):
