@@ -5,15 +5,23 @@
 #   pre: false
 #   features: []
 #   all-features: false
+#   with-sources: false
 
 -e file:.
 bleak==0.21.1
+    # via bless
+    # via hyper-clipboard
+bleak-winrt==1.2.0
+    # via bleak
 bless==0.2.6
-pyobjc-core==9.2
-pyobjc-framework-cocoa==9.2
-pyobjc-framework-corebluetooth==9.2
-pyobjc-framework-libdispatch==9.2
+    # via hyper-clipboard
 pyperclip==1.8.2
+    # via hyper-clipboard
+pywin32==306
+    # via bless
 simplepyble==0.7.1
+    # via hyper-clipboard
 sqids==0.4.1
+    # via hyper-clipboard
 typing-extensions==4.10.0
+    # via bleak
