@@ -5,7 +5,7 @@ from socket import gethostname
 import random
 import uuid
 import bisect
-from .utils import get_milli_unix_time,make_id_from_name
+from .utils import get_milli_unix_time,make_id_from_name,binsort
 from .const_values import squids,hostname
 
 
@@ -64,10 +64,11 @@ class LogsManager(Generic[T]):
     # 引数はObjectLog[T]にしている
     def add_log(self,log:ObjectLog[T])->None:
         if self.is_addable_log(log):
-            bisect.insort(self._logs,log)
+            binsort(self._logs,log,compareXthanY=lambda x,y:y.compare(x))
             if len(self._logs)>self.max_logs_length:
                 self._logs.pop(0)
     def get_top(self)->ObjectLog[T]:
         if len(self._logs)==0:
             return VoidObjectLog[T]()
         return self._logs[-1]
+    
