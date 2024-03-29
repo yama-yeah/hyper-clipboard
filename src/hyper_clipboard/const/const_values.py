@@ -1,3 +1,5 @@
+from logging import StreamHandler, getLogger
+import logging
 from socket import gethostname
 # pyright: reportPrivateImportUsage=false
 from sqids import Sqids
@@ -5,6 +7,7 @@ hostname = gethostname()
 squids=Sqids(blocklist=[])
 from dataclasses import dataclass
 from enum import Enum
+
 @dataclass
 class UUIDNames:
     MAIN="A07498CA-AD5B-474E-940D-16F1FBE7E8CD"
@@ -26,9 +29,18 @@ class UPDATING_STATE:
 @dataclass
 class ObserverNames:
     CLIP="clip"
-    BLE="ble"
+    BLE_SERVER="ble_server"
+    BLE_CLIENT="ble_client"
+    BLE_DISCOVERER="ble_discoverer"
 
 class AppEvents(Enum):
     NEUTRAL= "neutral"
     CLIPBOARD_CHANGED = "clipboard_changed"
     BLE_CLIP_RECEIVED = "ble_clip_received"
+
+from better_logger import BetterLogger
+logger = getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+stream_handler = StreamHandler()
+logger.addHandler(stream_handler)
+AppLogger=BetterLogger(logger)
