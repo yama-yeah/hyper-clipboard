@@ -8,20 +8,33 @@
 #   with-sources: false
 
 -e file:.
+better-loggers==1.0.1
+    # via hyper-clipboard
 bleak==0.21.1
     # via bless
     # via hyper-clipboard
-bleak-winrt==1.2.0
-    # via bleak
 bless==0.2.6
     # via hyper-clipboard
+frozendict==2.4.0
+    # via hyper-clipboard
+nest-asyncio==1.6.0
+    # via hyper-clipboard
+pyobjc-core==9.2
+    # via bleak
+    # via pyobjc-framework-cocoa
+    # via pyobjc-framework-corebluetooth
+    # via pyobjc-framework-libdispatch
+pyobjc-framework-cocoa==9.2
+    # via pyobjc-framework-corebluetooth
+pyobjc-framework-corebluetooth==9.2
+    # via bleak
+pyobjc-framework-libdispatch==9.2
+    # via bleak
 pyperclip==1.8.2
     # via hyper-clipboard
-pywin32==306
-    # via bless
 simplepyble==0.7.1
     # via hyper-clipboard
 sqids==0.4.1
     # via hyper-clipboard
-typing-extensions==4.10.0
-    # via bleak
+wcwidth==0.2.13
+    # via better-loggers
