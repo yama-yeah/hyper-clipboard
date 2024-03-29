@@ -32,11 +32,16 @@ class ObserverNames:
     BLE_SERVER="ble_server"
     BLE_CLIENT="ble_client"
     BLE_DISCOVERER="ble_discoverer"
+    STORAGE="storage"
 
 class AppEvents(Enum):
     NEUTRAL= "neutral"
     CLIPBOARD_CHANGED = "clipboard_changed"
     BLE_CLIP_RECEIVED = "ble_clip_received"
+
+class AppBTMode(Enum):
+    SERVER="server"
+    CLIENT="client"
 
 from better_logger import BetterLogger
 logger = getLogger(__name__)
