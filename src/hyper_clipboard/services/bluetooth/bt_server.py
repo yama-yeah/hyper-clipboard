@@ -3,11 +3,10 @@ from abc import ABC, abstractmethod
 import asyncio
 import sys
 import threading
-from typing import Union
+from typing import Union, Any
 
-from hyper_clipboard.const.object_loggers import _ObjectLog
 from hyper_clipboard.services.bluetooth.bt_base_objects import BTObject, InputBTObjectState
-from ...const.const_values import UPDATING_STATE, hostname,UUIDNames,ObserverNames
+from hyper_clipboard.const.const_values import UPDATING_STATE, AppLogger, hostname,UUIDNames
 from dataclasses import dataclass
 
 from bless import (  # type: ignore
@@ -73,15 +72,15 @@ class BTServer(BTObject):
             },
         },
     }
-    def __init__(self,server_name:str="HC-"+hostname):
-        super().__init__()
+    is_started=False
+    def __init__(self,loop:asyncio.AbstractEventLoop,server_name:str="HC-"+hostname,):
+        super().__init__(loop)
         self.trigger: Union[asyncio.Event, threading.Event]
         server_name=server_name[:12]
         if sys.platform in ["darwin", "win32"]:
             self.trigger = threading.Event()
         else:
             self.trigger = asyncio.Event()
-        self.loop = asyncio.get_event_loop()
         self.server:BlessServer=BlessServer(server_name,self.loop)
     
     def read_request(characteristic: BlessGATTCharacteristic, **kwargs) -> bytearray: # type: ignore
@@ -94,24 +93,23 @@ class BTServer(BTObject):
         await self.server.add_gatt(self.gatt)
         self.server.read_request_func = self.read_request #type: ignore
         self.server.write_request_func = self.write_request #type: ignore
-        print("Starting server")
+        AppLogger.info("Server started",header_text='BTServer message',use_traceback=True)
         await self.server.start()
-        print("Server started")
+        AppLogger.info("Advertising",header_text='BTServer message')
         self._update_a_value_from_state(UUIDNames.UPDATING_STATE)
         self._update_values_from_state()
         self.state.updating_state=UPDATING_STATE.NOT_UPDATING
         self._update_a_value_from_state(UUIDNames.UPDATING_STATE)
+        self.is_started=True
         if self.trigger.__module__ == "threading":
             self.trigger.wait()
         else:
             await self.trigger.wait() #type: ignore
-        print("Stopping server")
+        AppLogger.info("Server stopped",header_text='BTServer message')
         await self.server.stop()
-    def _run(self):
-        self.loop.run_until_complete(self._main())
 
     def run(self):
-        threading.Thread(target=self._run,daemon=False).start()    
+        self.loop.create_task(self._main())
 
     def _update_a_value_from_state(self,uuid:str):
         charact =self.server.get_characteristic(uuid)
@@ -131,11 +129,13 @@ class BTServer(BTObject):
         self.state.updating_state=UPDATING_STATE.UPDATED
         self._update_a_value_from_state(UUIDNames.UPDATING_STATE)
     def update_state_from_server(self):
+        if not self.is_started:
+            return
         for key in self.state.to_dict():
             charact =self.server.get_characteristic(key)
             if charact is None:
                 raise ValueError(f"Invalid characteristic: {key}")
-            self.state[key]=charact.value
+            self.state[key]=self.bytearrray_to_data(key,charact.value)
         self.state.updating_state=UPDATING_STATE.NOT_UPDATING
         self._update_a_value_from_state(UUIDNames.UPDATING_STATE)
     def update_input_from_server(self,input_state:InputBTObjectState):
