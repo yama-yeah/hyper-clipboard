@@ -1,16 +1,14 @@
-import threading
-import time
-from ...const.observable_objects import ObservableStreamer,Observable
-from .clip_manager import ClipLogsManager
-from ...const.object_loggers import _ObjectLog
-import pyperclip
+from hyper_clipboard.const.observable_objects import Observable
+from hyper_clipboard.const.object_loggers import ObjectLog
+
 class ClipObservable(Observable[str]):
-    def __init__(self,name:str,clipmanager=ClipLogsManager()):
+    
+    def __init__(self,name:str,clipmanager):
         self.clipmanager=clipmanager
         super().__init__(observer_name=name)
         
     def get_target(self):
         self.clipmanager.refresh_logs()
         return self.clipmanager.get_top()
-    def compare_target(self,new:_ObjectLog,old:_ObjectLog):
+    def compare_target(self,new:ObjectLog,old:ObjectLog):
         return new.value!=old.value
