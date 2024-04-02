@@ -1,12 +1,13 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Union
-from hyper_clipboard.const.const_values import UPDATING_STATE, UUIDNames
-from hyper_clipboard.const.object_loggers import _ObjectLog
-
+from hyper_clipboard.const.const_values import UPDATING_STATE, AppLogger, UUIDNames
+from hyper_clipboard.const.object_loggers import ObjectLog
+from hyper_clipboard.const.observable_objects import Observable
+import asyncio
 
 @dataclass
-class InputBTObjectState(_ObjectLog[str]):
+class InputBTObjectState(ObjectLog[str]):
     time_stamp:int
     value:Union[None,str]
     id:Union[None,str]
@@ -29,7 +30,7 @@ class InputBTObjectState(_ObjectLog[str]):
     def to_BTServerState(self)->'BTObjectState':
         return BTObjectState.from_dict(self.to_dict())
     @staticmethod
-    def from_object_log(log:_ObjectLog[str]):
+    def from_object_log(log:ObjectLog[str]):
         return InputBTObjectState(
             time_stamp=log.time_stamp,
             value=log.value,
@@ -75,6 +76,9 @@ class BTObject(ABC):
         UUIDNames.CLIPBOARD_ID:None,
         UUIDNames.UPDATING_STATE:UPDATING_STATE.UPDATING,
     })
+    is_started=False
+    def __init__(self,loop:asyncio.AbstractEventLoop):
+        self.loop=loop
     @abstractmethod
     def update_state_from_server(self):
         pass
@@ -84,3 +88,31 @@ class BTObject(ABC):
 
     def check_updatable_state(self,updating_state:InputBTObjectState,old_state:InputBTObjectState):
         return updating_state.time_stamp>old_state.time_stamp and updating_state.id!=old_state.id
+    def bytearrray_to_data(self,uuid:str,data:bytearray):
+        match uuid:
+            case UUIDNames.TIMESTAMP:
+                return int.from_bytes(data,"big")
+            case UUIDNames.CLIPBOARD:
+                return data.decode("utf-8")
+            case UUIDNames.CLIPBOARD_ID:
+                return data.decode("utf-8")
+            case UUIDNames.UPDATING_STATE:
+                return bytes(data)
+            case _:
+                raise ValueError(f"uuid:{uuid} is not supported")
+
+class BTObjectObservable(Observable):
+    def __init__(self,bt_object:BTObject,observer_name:str):
+        self.bt_object=bt_object
+        super().__init__(observer_name)
+    def get_target(self) -> BTObjectState:
+        try:
+            self.bt_object.update_state_from_server()
+        except Exception as e:
+            AppLogger.error(e,exception=e,header_text=f"BTObjectObservable:{self.observer_name}")
+        return self.bt_object.state
+    def compare_target(self,new:BTObjectState,old:BTObjectState):
+        return new.to_dict()!=old.to_dict()
+    
+    def check_can_observe(self):
+        return self.bt_object.is_started
