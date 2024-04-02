@@ -26,6 +26,7 @@ class UPDATING_STATE:
     NOT_UPDATING=b"0"
     UPDATING=b"1"
     UPDATED=b"2"
+
 @dataclass
 class ObserverNames:
     CLIP="clip"
@@ -39,9 +40,12 @@ class AppEvents(Enum):
     CLIPBOARD_CHANGED = "clipboard_changed"
     BLE_CLIP_RECEIVED = "ble_clip_received"
 
-class AppBTMode(Enum):
+@dataclass
+class AppBTMode:
     SERVER="server"
     CLIENT="client"
+
+
 
 from better_logger import BetterLogger
 logger = getLogger(__name__)
