@@ -1,5 +1,5 @@
-from hyper_clipboard.const.object_loggers import _ObjectLog
-from ...const.object_loggers import ChangedObjectLog, LogsManager
+from hyper_clipboard.const.object_loggers import ObjectLog
+from hyper_clipboard.const.object_loggers import ChangedObjectLog, LogsManager
 import pyperclip
 class ClipLogsManager(LogsManager[str]):
     def refresh_logs(self):
@@ -7,11 +7,12 @@ class ClipLogsManager(LogsManager[str]):
         top_log_clip=self.get_top().value
         if clip!=top_log_clip:
             self.add_log(ChangedObjectLog(clip))
+
+    def is_addable_log(self, log: ObjectLog[str]) -> bool:
+        return super().is_addable_log(log) and log.value != None and self.get_top().value != log.value
     
-    def add_log(self, log: _ObjectLog[str]) -> None:
+    def add_log(self, log: ObjectLog[str]) -> None:
+        super().add_log(log)
         if self.is_addable_log(log):
-            self._logs.append(log)
-            if len(self._logs) > self.max_logs_length:
-                self._logs.pop(0)
             pyperclip.copy(log.value)
 
