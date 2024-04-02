@@ -1,12 +1,8 @@
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional, TypeVar, Generic,Callable
-from socket import gethostname
-import random
-import uuid
-import bisect
-from .utils import get_milli_unix_time,make_id_from_name,binsort
-from .const_values import squids,hostname
+from typing import Optional, TypeVar, Generic
+
+from hyper_clipboard.const.utils import get_milli_unix_time,make_id_from_name,binsort
+from hyper_clipboard.const.const_values import squids,hostname
 
 
 
@@ -47,15 +43,9 @@ class VoidObjectLog(ObjectLog[T]):
         return True
         
 class LogsManager(Generic[T]):
-    _instance = None
-
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls, *args, **kwargs)
-
-        return cls._instance
     
-    def __init__(self,init_logs:list[ObjectLog[T]]=[],max_logs_length:int=1) -> None:
+    max_logs_length = 1
+    def __init__(self,init_logs:list[ObjectLog[T]],max_logs_length:int=1):
         self._logs = init_logs
         self.max_logs_length = max_logs_length
     def get_logs(self)->list[ObjectLog[T]]:
@@ -71,12 +61,13 @@ class LogsManager(Generic[T]):
     # 別デバイスからのログを受け取る場合があるので
     # 引数はObjectLog[T]にしている
     def add_log(self,log:ObjectLog[T])->None:
-        if self.is_addable_log(log):
-            binsort(self._logs,log,compareXthanY=lambda x,y:y.compare(x))
-            if len(self._logs)>self.max_logs_length:
-                self._logs.pop(0)
+        
+            if self.is_addable_log(log):
+                binsort(self._logs,log,compareXthanY=lambda x,y:y.compare(x))
+                if len(self._logs)>self.max_logs_length:
+                    self._logs.pop(self.max_logs_length)
     def get_top(self)->ObjectLog[T]:
         if len(self._logs)==0:
             return VoidObjectLog[T]()
-        return self._logs[-1]
+        return self._logs[0]
     
