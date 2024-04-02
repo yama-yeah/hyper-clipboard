@@ -1,5 +1,6 @@
+from dataclasses import dataclass
 from datetime import datetime,timezone
-from typing import Callable, Optional
+import os
 
 def make_id_from_name(name:str)->int:
     list_ = [str(ord(c)) for c in name]
@@ -42,3 +43,19 @@ def bisect_right(a, x, lo=0, hi=None, *, compareXthanY=lambda x,y:x<y):
 def binsort(a, x, lo=0,hi=None,*, compareXthanY=lambda x,y:x<y):
     i = bisect_right(a, x,lo,hi, compareXthanY=compareXthanY)
     a.insert(i, x)
+
+def get_config_path(app_name:str)->str:
+    # OSごとに適切なディレクトリを取得
+    if os.name == 'posix':  # LinuxやmacOS
+        config_dir = os.path.join(str(os.environ.get('HOME')), '.config', app_name)
+    elif os.name == 'nt':   # Windows
+        config_dir = os.path.join(str(os.environ.get('APPDATA')), app_name)
+    else:
+        config_dir = os.getcwd()  # その他のOSの場合はカレントディレクトリを使用するなどの処理が必要
+
+    # ディレクトリが存在しない場合は作成
+    if not os.path.exists(config_dir):
+        os.makedirs(config_dir)
+
+    return config_dir
+
