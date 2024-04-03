@@ -130,15 +130,19 @@ class SwitchAppModePage(SettingPageWidget):
             except ValueError:
                 selected=-1
                 return RebuidWidget()
+        is_popable=False
         if selected==1:
             app_mode=AppBTMode.SERVER
-            return PopWidget()
+            is_popable=True
+            
         elif selected==2:
             app_mode=AppBTMode.CLIENT
-            return PopWidget()
+            is_popable=True
         elif selected==len(selectable_texts):
+            is_popable=True
+        if is_popable:
+            self.storage.write(StorageIOWriteData(StorageIODataPath(AppConfigKeys.storage_type,AppConfigKeys.APP_BT_MODE),app_mode))
             return PopWidget()
-        self.storage.write(StorageIOWriteData(StorageIODataPath(AppConfigKeys.storage_type,AppConfigKeys.APP_BT_MODE),app_mode))
         return RebuidWidget()
 
 

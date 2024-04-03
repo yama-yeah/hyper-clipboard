@@ -89,7 +89,7 @@ def main():
 
 def setting():
     app_config_storage_settings=AppConfigStorageSettings()
-    app_config_storage=SharedJsonStorage(app_config_storage_settings,'./')
+    app_config_storage=SharedJsonStorage(app_config_storage_settings,get_config_path(app_name="hyper_clipboard"))
     storage=StorageIOCombine([app_config_storage])
     pages=[AllowDevicePage(storage),DisAllowDevicePage(storage),SwitchAppModePage(storage)]
     RootWidget(MainPage(pages)).run()
