@@ -28,10 +28,11 @@ class BTClients(BTObject):
         address_dict=self.devices_manager.get_top().value
         connected_names=self.clients.keys()
         tasks: list[asyncio.Task]=[]
+        connecting_clients={}
         for name,address in address_dict.items():
             if name not in connected_names:
                 client=BleakClient(address)
-                self.clients[name]=client
+                connecting_clients[name]=client
                 tasks.append(self.loop.create_task(client.connect()))
         while True:
             if len(tasks)==0:
@@ -39,6 +40,8 @@ class BTClients(BTObject):
             if all([task.done() for task in tasks]):
                 break
             asyncio.run(asyncio.sleep(0.1))
+        for key in connecting_clients.keys():
+            self.clients[key]=connecting_clients[key]
         
 
     async def run_transmission(self,task,client_name:str):
@@ -116,7 +119,7 @@ class BTClients(BTObject):
         if not await self._is_writable_state(client):
             return
         bytes_dict=self.state.to_bytes_dict()
-        for key in bytes_dict:
+        for key in bytes_dict.keys():
             await client.write_gatt_char(key,bytes_dict[key])
     
     async def _update_server_from_input_async(self, input_state: InputBTObjectState):
