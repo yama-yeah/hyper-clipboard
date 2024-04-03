@@ -115,6 +115,7 @@ class ObservableStreamer:
                         break
                 if flag:
                     break
+                asyncio.run(asyncio.sleep(self.interval))
             for observable in self.observables:
                 data=observable.get_stream_data()
                 if isinstance(data,ChangedStreamData):
