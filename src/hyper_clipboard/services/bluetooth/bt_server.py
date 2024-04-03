@@ -83,9 +83,9 @@ class BTServer(BTObject):
             self.trigger = asyncio.Event()
         self.server:BlessServer=BlessServer(server_name,self.loop)
     
-    def read_request(characteristic: BlessGATTCharacteristic, **kwargs) -> bytearray: # type: ignore
+    def read_request(self,characteristic: BlessGATTCharacteristic, **kwargs) -> bytearray: # type: ignore
         return characteristic.value
-    def write_request(characteristic: BlessGATTCharacteristic, value: Any, **kwargs): # type: ignore
+    def write_request(self,characteristic: BlessGATTCharacteristic, value: Any, **kwargs): # type: ignore
         characteristic.value = value
 
     async def _main(self):
@@ -102,7 +102,8 @@ class BTServer(BTObject):
         self._update_a_value_from_state(UUIDNames.UPDATING_STATE)
         self.is_started=True
         if self.trigger.__module__ == "threading":
-            self.trigger.wait()
+            while not self.trigger.is_set():
+                await asyncio.sleep(1)
         else:
             await self.trigger.wait() #type: ignore
         AppLogger.info("Server stopped",header_text='BTServer message')
