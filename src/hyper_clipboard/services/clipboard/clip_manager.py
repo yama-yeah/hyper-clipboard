@@ -1,3 +1,4 @@
+from hyper_clipboard.const.const_values import AppLogger
 from hyper_clipboard.const.object_loggers import ObjectLog
 from hyper_clipboard.const.object_loggers import ChangedObjectLog, LogsManager
 import pyperclip
@@ -12,7 +13,8 @@ class ClipLogsManager(LogsManager[str]):
         return super().is_addable_log(log) and log.value != None and self.get_top().value != log.value
     
     def add_log(self, log: ObjectLog[str]) -> None:
-        super().add_log(log)
         if self.is_addable_log(log):
+            AppLogger.wtf(log.value,header_text='clip manager',use_traceback=False)
             pyperclip.copy(log.value)
+        super().add_log(log)
 
