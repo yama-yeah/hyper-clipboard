@@ -87,7 +87,7 @@ class BTObject(ABC):
         pass
 
     def check_updatable_state(self,updating_state:InputBTObjectState,old_state:InputBTObjectState):
-        return updating_state.time_stamp>old_state.time_stamp and updating_state.id!=old_state.id
+        return updating_state.time_stamp>old_state.time_stamp and updating_state.id!=old_state.id and updating_state.value!=old_state.value
     def bytearrray_to_data(self,uuid:str,data:bytearray):
         match uuid:
             case UUIDNames.TIMESTAMP:
@@ -110,9 +110,10 @@ class BTObjectObservable(Observable):
             self.bt_object.update_state_from_server()
         except Exception as e:
             AppLogger.error(e,exception=e,header_text=f"BTObjectObservable:{self.observer_name}")
-        return self.bt_object.state
+        state=self.bt_object.state
+        return BTObjectState(time_stamp=state.time_stamp,value=state.value,id=state.id)
     def compare_target(self,new:BTObjectState,old:BTObjectState):
-        return new.to_dict()!=old.to_dict()
+        return new.time_stamp>old.time_stamp and new.id!=old.id and new.value!=old.value
     
     def check_can_observe(self):
         return self.bt_object.is_started
