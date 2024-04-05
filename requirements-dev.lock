@@ -17,8 +17,14 @@ bless==0.2.6
     # via hyper-clipboard
 frozendict==2.4.0
     # via hyper-clipboard
+iniconfig==2.0.0
+    # via pytest
 nest-asyncio==1.6.0
     # via hyper-clipboard
+packaging==24.0
+    # via pytest
+pluggy==1.4.0
+    # via pytest
 pyobjc-core==9.2
     # via bleak
     # via pyobjc-framework-cocoa
@@ -32,6 +38,7 @@ pyobjc-framework-libdispatch==9.2
     # via bleak
 pyperclip==1.8.2
     # via hyper-clipboard
+pytest==8.1.1
 simplepyble==0.7.1
     # via hyper-clipboard
 sqids==0.4.1
