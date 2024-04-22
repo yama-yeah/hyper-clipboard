@@ -73,7 +73,7 @@ class BTServer(BTObject):
         },
     }
     is_started=False
-    def __init__(self,loop:asyncio.AbstractEventLoop,server_name:str="HC-"+hostname,):
+    def __init__(self,loop:asyncio.AbstractEventLoop,server_name:str="HC-"+hostname,initiall_clipboard_value:str=""):
         super().__init__(loop)
         self.trigger: Union[asyncio.Event, threading.Event]
         server_name=server_name[:12]
@@ -81,6 +81,7 @@ class BTServer(BTObject):
             self.trigger = threading.Event()
         else:
             self.trigger = asyncio.Event()
+        self.state.value=initiall_clipboard_value
         self.server:BlessServer=BlessServer(server_name,self.loop)
     
     def read_request(self,characteristic: BlessGATTCharacteristic, **kwargs) -> bytearray: # type: ignore
