@@ -19,6 +19,8 @@ class ChangeableState(_IsChangeableObjectSealed):
 
 class BTClients(BTObject):
     clients:dict[str,BleakClient]={}
+    read_tasks: list[asyncio.Task]=[]
+    write_tasks: list[asyncio.Task]=[]
     def __init__(self,devices_manager:BTDevicesManager,loop: asyncio.AbstractEventLoop) -> None:
         self.is_started=True
         self.devices_manager=devices_manager
@@ -34,6 +36,10 @@ class BTClients(BTObject):
                 client=BleakClient(address)
                 connecting_clients[name]=client
                 tasks.append(self.loop.create_task(client.connect()))
+            elif self.clients[name].address!=address:
+                client=BleakClient(address)
+                connecting_clients[name]=client
+                tasks.append(self.loop.create_task(client.connect()))   
         while True:
             if len(tasks)==0:
                 break
@@ -42,9 +48,16 @@ class BTClients(BTObject):
             asyncio.run(asyncio.sleep(0.1))
         for key in connecting_clients.keys():
             self.clients[key]=connecting_clients[key]
+    
+    async def __wait_tasks(self):
+        while True:
+            if len(self.write_tasks)==0 and len(self.read_tasks)==0:
+                break
+            await asyncio.sleep(0.1)
         
 
     async def run_transmission(self,task,client_name:str):
+            
         client=self.clients[client_name]
         try:
             updating_state=await self._read_gatt_char(client,UUIDNames.UPDATING_STATE)
@@ -57,7 +70,8 @@ class BTClients(BTObject):
         except Exception as e:
             AppLogger.error(e,exception=e,header_text='BTClients transmission error')
             await client.disconnect()
-            self.clients.pop(client_name)
+            if client_name in self.clients.keys():
+                self.clients.pop(client_name)
     
     async def _read_gatt_char(self,client: BleakClient,uuid:str)->dict[str,Any]:
         data=await client.read_gatt_char(uuid)
@@ -91,12 +105,15 @@ class BTClients(BTObject):
             self.state=changeable_state.value
     
     async def _update_state_from_server_async(self):
-        tasks=[]
+        await self.__wait_tasks()
         for client_name in self.clients.keys():
             task=self.loop.create_task(self.run_transmission(self._fetch_state,client_name))
-            tasks.append(task)
+            self.read_tasks.append(task)
         while True:
-            if all([task.done() for task in tasks]):
+            for i,task in enumerate(self.read_tasks):
+                if task.done():
+                    self.read_tasks.pop(i)
+            if len(self.read_tasks)==0:
                 break
             await asyncio.sleep(0.1)
         
@@ -104,14 +121,12 @@ class BTClients(BTObject):
         self.loop.run_until_complete(self._update_state_from_server_async())
         
     async def _is_writable_state(self,client: BleakClient)->bool:
-        updating_state=await self._read_gatt_char(client,UUIDNames.UPDATING_STATE)
-        if updating_state[UUIDNames.UPDATING_STATE]==bytearray(UPDATING_STATE.UPDATING):
-            return False
         timestamp=await self._read_gatt_char(client,UUIDNames.TIMESTAMP)
         timestamp=timestamp[UUIDNames.TIMESTAMP]
         uuid= await self._read_gatt_char(client,UUIDNames.CLIPBOARD_ID)
         uuid=uuid[UUIDNames.CLIPBOARD_ID]
         if timestamp>=self.state.time_stamp or uuid==self.state.id:
+            AppLogger.warning(f"client:{client.address} is not writable because of timestamp:{timestamp} and uuid:{uuid} ",header_text='BTClients message')
             return False
         return True
 
@@ -123,16 +138,19 @@ class BTClients(BTObject):
             await client.write_gatt_char(key,bytes_dict[key])
     
     async def _update_server_from_input_async(self, input_state: InputBTObjectState):
+        await self.__wait_tasks()
         if not self.check_updatable_state(input_state,self.state):
             return
         self.state=input_state.to_BTServerState()
         self.state.updating_state=UPDATING_STATE.UPDATING
-        tasks=[]
         for client_name in self.clients.keys():
             task=self.loop.create_task(self.run_transmission(self._post_state,client_name))
-            tasks.append(task)
+            self.write_tasks.append(task)
         while True:
-            if all([task.done() for task in tasks]):
+            for i,task in enumerate(self.write_tasks):
+                if task.done():
+                    self.write_tasks.pop(i)
+            if len(self.write_tasks)==0:
                 break
             await asyncio.sleep(0.1)
         self.state.updating_state=UPDATING_STATE.UPDATED
