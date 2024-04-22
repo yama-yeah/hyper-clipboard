@@ -37,7 +37,7 @@ def _main():
         observers_dict[ObserverNames.BLE_CLIENT]=clients_state_observable
 
     elif mode==AppBTMode.SERVER:
-        server=BTServer(main_loop)
+        server=BTServer(main_loop,initiall_clipboard_value=pyperclip.paste())
         server.run()
         server_state_observable=BTObjectObservable(server,ObserverNames.BLE_SERVER)
         observers_dict[ObserverNames.BLE_SERVER]=server_state_observable
@@ -56,7 +56,8 @@ def _main():
     stream=ObservableAsyncStreamer(observer_list,0.1,main_loop).sink()
     
     for data in stream:
-        AppLogger.info(data.data,header_text=data.from_)
+        if data.from_!=ObserverNames.BLE_DISCOVERER:
+            AppLogger.info(data.data,header_text=data.from_)
         match data.from_:
             case ObserverNames.CLIP:
                 if pyperclip.paste()==data.data.value:
