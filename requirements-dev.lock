@@ -13,8 +13,10 @@ better-loggers==1.0.1
 bleak==0.21.1
     # via bless
     # via hyper-clipboard
-bless==0.2.6
+bless @ git+https://github.com/yama-yeah/bless
     # via hyper-clipboard
+colorama==0.4.6
+    # via pytest
 frozendict==2.4.0
     # via hyper-clipboard
 iniconfig==2.0.0
@@ -25,23 +27,45 @@ packaging==24.0
     # via pytest
 pluggy==1.4.0
     # via pytest
-pyobjc-core==9.2
-    # via bleak
-    # via pyobjc-framework-cocoa
-    # via pyobjc-framework-corebluetooth
-    # via pyobjc-framework-libdispatch
-pyobjc-framework-cocoa==9.2
-    # via pyobjc-framework-corebluetooth
-pyobjc-framework-corebluetooth==9.2
-    # via bleak
-pyobjc-framework-libdispatch==9.2
-    # via bleak
 pyperclip==1.8.2
     # via hyper-clipboard
+pysetupdi @ git+https://github.com/gwangyi/pysetupdi
+    # via bless
 pytest==8.1.1
+pywin32==306
+    # via bless
 simplepyble==0.7.1
     # via hyper-clipboard
 sqids==0.4.1
     # via hyper-clipboard
 wcwidth==0.2.13
     # via better-loggers
+winrt-runtime==2.0.0b1
+    # via winrt-windows-devices-bluetooth
+    # via winrt-windows-devices-bluetooth-advertisement
+    # via winrt-windows-devices-bluetooth-genericattributeprofile
+    # via winrt-windows-devices-enumeration
+    # via winrt-windows-foundation
+    # via winrt-windows-foundation-collections
+    # via winrt-windows-storage-streams
+winrt-windows-devices-bluetooth==2.0.0b1
+    # via bleak
+    # via bless
+winrt-windows-devices-bluetooth-advertisement==2.0.0b1
+    # via bleak
+    # via bless
+winrt-windows-devices-bluetooth-genericattributeprofile==2.0.0b1
+    # via bleak
+    # via bless
+winrt-windows-devices-enumeration==2.0.0b1
+    # via bleak
+    # via bless
+winrt-windows-foundation==2.0.0b1
+    # via bleak
+    # via bless
+winrt-windows-foundation-collections==2.0.0b1
+    # via bleak
+    # via bless
+winrt-windows-storage-streams==2.0.0b1
+    # via bleak
+    # via bless

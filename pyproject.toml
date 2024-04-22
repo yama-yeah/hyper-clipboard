@@ -8,12 +8,12 @@ authors = [
 dependencies = [
     "pyperclip>=1.8.2",
     "simplepyble>=0.7.1",
-    "bleak>=0.21.1",
-    "bless>=0.2.6",
     "sqids>=0.4.1",
     "better-loggers>=1.0.1",
     "nest_asyncio>=1.6.0",
     "frozendict>=2.4.0",
+    "bleak>=0.21.1",
+    "bless @ git+https://github.com/yama-yeah/bless",
 ]
 readme = "README.md"
 requires-python = ">= 3.11"
